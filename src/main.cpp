@@ -52,6 +52,7 @@ class CreatureStrength
         Vigor PowerMod;
         Vigor ToughnessMod;
     public:
+        CreatureStrength() = default;
         CreatureStrength(const Vigor PowTough) :
             BasePower(PowTough),
             BaseToughness(PowTough),
@@ -82,6 +83,12 @@ class CreatureStrength
         {
             PowerMod = 0;
             ToughnessMod = 0;
+        }
+
+        void SetBase(const Vigor Power, const Vigor Toughness)
+        {
+            BasePower = Power;
+            BaseToughness = Toughness;
         }
 
         Vigor GetPower() const
@@ -182,11 +189,10 @@ class ManaCost
 struct magic_card
 {
     std::string Name;
-    std::string Cost;
+    ManaCost Cost;
     Whole SuperType;
     std::string SubType;
-    Vigor Power;
-    Vigor Toughness;
+    CreatureStrength Might;
 };
 
 void print(const std::string& str)
@@ -196,8 +202,8 @@ void print(const std::string& str)
 
 CombatResult combat(magic_card attacker, magic_card defender)
 {
-    bool DefenderDeath = attacker.Power >= defender.Toughness;
-    bool AttackerDeath = defender.Power >= attacker.Toughness;
+    bool DefenderDeath = defender.Might.IsLethal(attacker.Might.GetPower());
+    bool AttackerDeath = attacker.Might.IsLethal(defender.Might.GetPower());
 
     if(DefenderDeath && AttackerDeath)
     {
@@ -225,27 +231,24 @@ int main()
 
     magic_card LavaZombie;
     LavaZombie.Name = "Lava Zombie";
-    LavaZombie.Cost = "1BR";
+    LavaZombie.Cost.SetCost("1BR");
     LavaZombie.SuperType = Creature;
     LavaZombie.SubType = "Zombie";
-    LavaZombie.Power = 4;
-    LavaZombie.Toughness = 3;
+    LavaZombie.Might.SetBase(4,3);
 
     magic_card WallOfWonder;
     WallOfWonder.Name = "Wall of Wonder";
-    WallOfWonder.Cost = "2UU";
+    WallOfWonder.Cost.SetCost("2UU");
     WallOfWonder.SuperType = Creature;
     WallOfWonder.SubType = "Wall";
-    WallOfWonder.Power = 1;
-    WallOfWonder.Toughness = 5;
+    WallOfWonder.Might.SetBase(1,5);
 
     magic_card Ulamog;
     Ulamog.Name = "Ulamog, The Ceaseless Hunger";
-    Ulamog.Cost = "10";
+    Ulamog.Cost.SetCost("10");
     Ulamog.SuperType = Legendary | Creature;
     Ulamog.SubType = "Eldrazi";
-    Ulamog.Power = 10;
-    Ulamog.Toughness = 10;
+    Ulamog.Might.SetBase(10,10);
 
     CombatResult Com = combat(Ulamog, WallOfWonder);
 
