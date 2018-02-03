@@ -10,7 +10,7 @@
 #include <iostream>
 
 using Whole = unsigned int;
-
+using Vigor = int;
 
 enum Color
 {
@@ -43,6 +43,56 @@ enum class CombatResult : Whole
     DefenderWins,
     Tie,
     DoubleLoss
+};
+
+class CreatureStrength
+{
+        Vigor BasePower;
+        Vigor BaseToughness;
+        Vigor PowerMod;
+        Vigor ToughnessMod;
+    public:
+        CreatureStrength(const Vigor PowTough) :
+            BasePower(PowTough),
+            BaseToughness(PowTough),
+            PowerMod(0),
+            ToughnessMod(0)
+            {}
+        CreatureStrength(const Vigor Power, const Vigor Toughness) :
+            BasePower(Power),
+            BaseToughness(Toughness),
+            PowerMod(0),
+            ToughnessMod(0)
+            {}
+        ~CreatureStrength()
+            {}
+
+        bool IsLethal(const Vigor Dmg) const
+        {
+            return Dmg >= BaseToughness;
+        }
+
+        void SetModifiers(const Vigor Power, const Vigor Toughness)
+        {
+            PowerMod = Power;
+            ToughnessMod = Toughness;
+        }
+
+        void ClearModifiers()
+        {
+            PowerMod = 0;
+            ToughnessMod = 0;
+        }
+
+        Vigor GetPower() const
+        {
+            return BasePower;
+        }
+
+        Vigor GetToughness() const
+        {
+            return BaseToughness;
+        }
 };
 
 class ManaCost
@@ -128,8 +178,6 @@ class ManaCost
             return RetColors;
         }
 };
-
-using Vigor = int;
 
 struct magic_card
 {
