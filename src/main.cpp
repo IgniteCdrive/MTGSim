@@ -9,7 +9,35 @@
 #include <string>
 #include <iostream>
 
-enum CombatResult
+using Whole = unsigned int;
+
+
+enum Color
+{
+    Colorless = 0,
+    Red = 1,
+    Black = 2,
+    White = 4,
+    Blue = 8,
+    Green = 16
+};
+
+enum Super_Type
+{
+    Basic = 1,
+    Creature = 2,
+    Artifact = 4,
+    Sorcery = 8,
+    Instant = 16,
+    Land = 32,
+    Planeswalker = 64,
+    Enchantment = 128,
+    Snow = 256,
+    Legendary = 512,
+    World = 1024
+};
+
+enum class CombatResult : Whole
 {
     AttackerWins,
     DefenderWins,
@@ -17,23 +45,106 @@ enum CombatResult
     DoubleLoss
 };
 
+class ManaCost
+{
+        std::string Cost;
+    public:
+        ManaCost() = default;
+        ManaCost(const std::string& Str) :
+            Cost(Str)
+            {}
+        ~ManaCost() = default;
+
+        void SetCost(const std::string& ToSet)
+        {
+            Cost = ToSet;
+        }
+
+        const std::string& GetCost() const
+        {
+            return Cost;
+        }
+
+        Whole Devotion(Whole Colors) const
+        {
+            std::string Palette;
+
+            if( Colors & White ) {
+                Palette.push_back('W');
+            }
+            if( Colors & Black ) {
+                Palette.push_back('B');
+            }
+            if( Colors & Red ) {
+                Palette.push_back('R');
+            }
+            if( Colors & Blue ) {
+                Palette.push_back('U');
+            }
+            if( Colors & Green ) {
+                Palette.push_back('G');
+            }
+            Whole DevCount = 0;
+            for(std::string::const_iterator StrIt = Cost.begin(); StrIt != Cost.end(); ++StrIt)
+            {
+                for(std::string::iterator PalCheck = Palette.begin(); PalCheck != Palette.end(); ++PalCheck)
+                {
+                    if(*StrIt == *PalCheck)
+                    {
+                        ++DevCount;
+                        break;
+                    }
+                }
+            }
+            return DevCount;
+        }
+
+        Whole GetConMana() const
+        {
+            Whole RetCost = 0;
+            size_t ColorPos = Cost.find_first_of("WUBRGC");
+            std::string NumCost = Cost.substr(0,ColorPos);
+            RetCost += std::stoi(NumCost);
+            RetCost += (Cost.size() - ColorPos);
+            return RetCost;
+        }
+
+        Whole GetColors() const
+        {
+            Whole RetColors = 0;
+            size_t ColorPos = Cost.find_first_of("WUBRGC");
+            std::string ColorString = Cost.substr(ColorPos);
+            for(std::string::iterator StrIt = ColorString.begin(); StrIt != ColorString.end(); ++StrIt)
+            {
+                switch(*StrIt)
+                {
+                    case 'W':  RetColors |= White; break;
+                    case 'U':  RetColors |= Blue;  break;
+                    case 'B':  RetColors |= Black; break;
+                    case 'R':  RetColors |= Red;   break;
+                    case 'G':  RetColors |= Green; break;
+                }
+            }
+            return RetColors;
+        }
+};
+
+using Vigor = int;
 
 struct magic_card
 {
     std::string Name;
     std::string Cost;
-    std::string SuperType;
+    Whole SuperType;
     std::string SubType;
-    int Power;
-    int Toughness;
+    Vigor Power;
+    Vigor Toughness;
 };
-
 
 void print(const std::string& str)
 {
     std::cout << str << std::endl;
 }
-
 
 CombatResult combat(magic_card attacker, magic_card defender)
 {
@@ -42,65 +153,78 @@ CombatResult combat(magic_card attacker, magic_card defender)
 
     if(DefenderDeath && AttackerDeath)
     {
-        return DoubleLoss;
+        return CombatResult::DoubleLoss;
     }
 
     if(DefenderDeath && !AttackerDeath)
     {
-        return AttackerWins;
+        return CombatResult::AttackerWins;
     }
 
     if(AttackerDeath && !DefenderDeath)
     {
-        return DefenderWins;
+        return CombatResult::DefenderWins;
     }
 
     if(!AttackerDeath && !DefenderDeath)
     {
-        return Tie;
+        return CombatResult::Tie;
     }
 }
 
 int main()
 {
 
-    magic_card attacker;
-    attacker.Name = "Lava Zombie";
-    attacker.Cost = "1BR";
-    attacker.SuperType = "Creature";
-    attacker.SubType = "Zombie";
-    attacker.Power = 4;
-    attacker.Toughness = 3;
+    magic_card LavaZombie;
+    LavaZombie.Name = "Lava Zombie";
+    LavaZombie.Cost = "1BR";
+    LavaZombie.SuperType = Creature;
+    LavaZombie.SubType = "Zombie";
+    LavaZombie.Power = 4;
+    LavaZombie.Toughness = 3;
 
-    magic_card defender;
-    defender.Name = "Wall of Wonder";
-    defender.Cost = "2BB";
-    defender.SuperType = "Creature";
-    defender.SubType = "Wall";
-    defender.Power = 1;
-    defender.Toughness = 5;
+    magic_card WallOfWonder;
+    WallOfWonder.Name = "Wall of Wonder";
+    WallOfWonder.Cost = "2UU";
+    WallOfWonder.SuperType = Creature;
+    WallOfWonder.SubType = "Wall";
+    WallOfWonder.Power = 1;
+    WallOfWonder.Toughness = 5;
 
+    magic_card Ulamog;
+    Ulamog.Name = "Ulamog, The Ceaseless Hunger";
+    Ulamog.Cost = "10";
+    Ulamog.SuperType = Legendary | Creature;
+    Ulamog.SubType = "Eldrazi";
+    Ulamog.Power = 10;
+    Ulamog.Toughness = 10;
 
-    int c = combat(attacker, defender);
+    CombatResult Com = combat(Ulamog, WallOfWonder);
 
-    if(c == AttackerWins)
+    if(Com == CombatResult::AttackerWins)
     {
         std::cout << "End Match: Attacker Wins" << std::endl;
     }
 
-    if(c == DefenderWins)
+    if(Com == CombatResult::DefenderWins)
     {
         std::cout << "End Match: Defender Wins" << std::endl;
     }
 
-    if(c == DoubleLoss)
+    if(Com == CombatResult::DoubleLoss)
     {
         std::cout << "End Match: Double Loss" << std::endl;
     }
 
-    if(c == Tie)
+    if(Com == CombatResult::Tie)
     {
         std::cout << "End Match: Tie" << std::endl;
     }
+    ManaCost ColorUni("10WB");
+    std::cout << "Devotion of White and Black " << ColorUni.Devotion(White | Black) << std::endl;
+    ManaCost ColorMulti ("UUBBBRR");
+    std::cout << "Checks for three colors " << ColorMulti.Devotion(Blue | Black | Red) << std::endl;
+    ManaCost ColorSeq("3WUBRG");
+    std::cout << "ManaCost of Coalition Victory " << ColorSeq.GetConMana() << std::endl;
     return 0;
 }
