@@ -47,10 +47,10 @@ enum class CombatResult : Whole
 
 class CreatureStrength
 {
-        Vigor BasePower;
-        Vigor BaseToughness;
-        Vigor PowerMod;
-        Vigor ToughnessMod;
+        Vigor BasePower = 0;
+        Vigor BaseToughness = 0;
+        Vigor PowerMod = 0;
+        Vigor ToughnessMod = 0;
     public:
         CreatureStrength() = default;
         CreatureStrength(const Vigor PowTough) :
@@ -65,8 +65,12 @@ class CreatureStrength
             PowerMod(0),
             ToughnessMod(0)
             {}
-        ~CreatureStrength()
-            {}
+        CreatureStrength(const CreatureStrength& Other) = default;
+        CreatureStrength(CreatureStrength&& Other) = default;
+        ~CreatureStrength() = default;
+
+        CreatureStrength& operator=(const CreatureStrength& Other) = default;
+        CreatureStrength& operator=(CreatureStrength&& Other) = default;
 
         bool IsLethal(const Vigor Dmg) const
         {
@@ -107,10 +111,15 @@ class ManaCost
         std::string Cost;
     public:
         ManaCost() = default;
+        ManaCost(const ManaCost& Other) = default;
+        ManaCost(ManaCost&& Other) = default;
         ManaCost(const std::string& Str) :
             Cost(Str)
             {}
         ~ManaCost() = default;
+
+        ManaCost& operator=(const ManaCost& Other) = default;
+        ManaCost& operator=(ManaCost&& Other) = default;
 
         void SetCost(const std::string& ToSet)
         {
@@ -186,13 +195,87 @@ class ManaCost
         }
 };
 
-struct magic_card
+class magic_card
 {
     std::string Name;
     ManaCost Cost;
-    Whole SuperType;
+    Whole SuperType = 0;
     std::string SubType;
     CreatureStrength Might;
+public:
+    magic_card() = default;
+    magic_card(const magic_card& Other) = default;
+    magic_card(magic_card&& Other) = default;
+
+    magic_card& operator=(const magic_card& Other) = default;
+    magic_card& operator=(magic_card&& Other) = default;
+
+    magic_card& SetName(const std::string& ToSet)
+    {
+        Name = ToSet;
+        return *this;
+    }
+
+    const std::string& GetName() const
+    {
+        return Name;
+    }
+
+    magic_card& SetCost(const ManaCost& ToSet)
+    {
+        Cost = ToSet;
+        return *this;
+    }
+
+    magic_card& SetCost(const std::string& ToSet)
+    {
+        Cost.SetCost(ToSet);
+        return *this;
+    }
+
+    const ManaCost& GetCost() const
+    {
+        return Cost;
+    }
+
+    magic_card& SetSuperType(const Whole ToSet)
+    {
+        SuperType = ToSet;
+        return *this;
+    }
+
+    Whole GetSuperType() const
+    {
+        return SuperType;
+    }
+
+    magic_card& SetSubType(const std::string& ToSet)
+    {
+        SubType = ToSet;
+        return *this;
+    }
+
+    const std::string& GetSubType() const
+    {
+        return SubType;
+    }
+
+    magic_card& SetMight(const CreatureStrength& ToSet)
+    {
+        Might = ToSet;
+        return *this;
+    }
+
+    magic_card& SetMight(const Vigor Power, const Vigor Toughness)
+    {
+        Might.SetBase(Power,Toughness);
+        return *this;
+    }
+
+    const CreatureStrength& GetMight() const
+    {
+        return Might;
+    }
 };
 
 void print(const std::string& str)
@@ -202,8 +285,8 @@ void print(const std::string& str)
 
 CombatResult combat(magic_card attacker, magic_card defender)
 {
-    bool DefenderDeath = defender.Might.IsLethal(attacker.Might.GetPower());
-    bool AttackerDeath = attacker.Might.IsLethal(defender.Might.GetPower());
+    bool DefenderDeath = defender.GetMight().IsLethal(attacker.GetMight().GetPower());
+    bool AttackerDeath = attacker.GetMight().IsLethal(defender.GetMight().GetPower());
 
     if(DefenderDeath && AttackerDeath)
     {
@@ -230,25 +313,16 @@ int main()
 {
 
     magic_card LavaZombie;
-    LavaZombie.Name = "Lava Zombie";
-    LavaZombie.Cost.SetCost("1BR");
-    LavaZombie.SuperType = Creature;
-    LavaZombie.SubType = "Zombie";
-    LavaZombie.Might.SetBase(4,3);
+    LavaZombie.SetName("Lava Zombie").SetCost("1BR");
+    LavaZombie.SetSuperType(Creature).SetSubType("Zombie").SetMight(4,3);
 
     magic_card WallOfWonder;
-    WallOfWonder.Name = "Wall of Wonder";
-    WallOfWonder.Cost.SetCost("2UU");
-    WallOfWonder.SuperType = Creature;
-    WallOfWonder.SubType = "Wall";
-    WallOfWonder.Might.SetBase(1,5);
+    WallOfWonder.SetName("Wall of Wonder").SetCost("2UU");
+    WallOfWonder.SetSuperType(Creature).SetSubType("Wall").SetMight(1,5);
 
     magic_card Ulamog;
-    Ulamog.Name = "Ulamog, The Ceaseless Hunger";
-    Ulamog.Cost.SetCost("10");
-    Ulamog.SuperType = Legendary | Creature;
-    Ulamog.SubType = "Eldrazi";
-    Ulamog.Might.SetBase(10,10);
+    Ulamog.SetName("Ulamog, The Ceaseless Hunger").SetCost("10");
+    Ulamog.SetSuperType(Legendary | Creature).SetSubType("Eldrazi").SetMight(10,10);
 
     CombatResult Com = combat(Ulamog, WallOfWonder);
 
