@@ -8,7 +8,6 @@
 #include "creaturestrength.h"
 #include "manacost.h"
 
-
 class magic_card
 {
     std::string Name;

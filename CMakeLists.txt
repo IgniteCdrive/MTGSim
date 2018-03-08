@@ -7,11 +7,14 @@ set(MTGSim_sources
     src/creaturestrength.h
     src/datatypes.h
     src/enums.h
+    src/eventmanager.h
     src/magiccard.h
     src/manacost.h
+    src/subscriber.h
     # sources
     src/abilities.cpp
     src/creaturestrength.cpp
+    src/eventmanager.cpp
     src/magiccard.cpp
     src/manacost.cpp
     # main

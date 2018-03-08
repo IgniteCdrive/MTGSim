@@ -39,6 +39,7 @@ enum class TriggerEvents
 {
     BlockerDeclared,
     AttackerDeclared,
+    AttackerBlocked,
     SpellCast,
     SpellCountered,
     EntersBattlefield,
